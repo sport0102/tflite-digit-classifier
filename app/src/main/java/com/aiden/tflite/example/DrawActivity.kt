@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.aiden.tflite.example.databinding.ActivityDrawBinding
 import java.io.IOException
+import java.util.*
 
 class DrawActivity : AppCompatActivity() {
     private val binding by lazy { ActivityDrawBinding.inflate(layoutInflater, null, false) }
@@ -18,6 +19,11 @@ class DrawActivity : AppCompatActivity() {
         initClassifier()
     }
 
+    override fun onDestroy() {
+        if (::classifier.isInitialized) classifier.finish()
+        super.onDestroy()
+    }
+
     private fun initCanvas() {
         binding.run {
             drawView.run {
@@ -27,6 +33,9 @@ class DrawActivity : AppCompatActivity() {
             }
             btnClassify.setOnClickListener {
                 val image = drawView.getBitmap()
+                val result = classifier.classify(image)
+                val outString = String.format(Locale.ENGLISH, "%d, %.0f%%", result.first, result.second * 100.0f)
+                textResult.text = outString
             }
             btnClear.setOnClickListener {
                 drawView.clearCanvas()
@@ -35,7 +44,7 @@ class DrawActivity : AppCompatActivity() {
     }
 
     private fun initClassifier() {
-        classifier = Classifier(assets, Classifier.DIGIT_CLASSIFIER)
+        classifier = Classifier(assets, Classifier.DIGIT_CLASSIFIER_V2)
         try {
             classifier.init()
         } catch (exception: IOException) {
