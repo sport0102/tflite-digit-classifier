@@ -39,6 +39,7 @@ class DrawActivity : AppCompatActivity() {
             }
             btnClear.setOnClickListener {
                 drawView.clearCanvas()
+                textResult.text = ""
             }
         }
     }
